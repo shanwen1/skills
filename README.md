@@ -1,7 +1,6 @@
-# 为了省 Token，我做了一个让 GPT 和 Codex 自己对话的 Skill
+<img width="842" height="561" alt="image" src="https://github.com/user-attachments/assets/c3834173-f98a-4e8b-926f-97048e7caead" /><img width="842" height="561" alt="image" src="https://github.com/user-attachments/assets/51ae3ca5-6b60-45b9-bc5f-16ae9109858d" /># 为了省 Token，我做了一个让 GPT 和 Codex 自己对话的 Skill
 
 ### GPT-Codex Bridge — Stop copy-pasting. Let agents review each other's work.
-![Uploading image.png…]()
 
 我原本只想解决一个很小、但每天都在浪费时间的问题：
 
@@ -13,7 +12,6 @@
 
 它的目标很直接：**你提出一次需求，让执行 Agent 和 GPT 自己完成「执行 → 审查 → 修复 → 复审」的循环。**
 
-![GPT-Codex Bridge：使用前反复复制粘贴，使用后自动执行、独立审查与修复复验](gpt-codex-bridge/assets/before-after.svg)
 
 ## 你负责定义目标，Agent 负责跑完闭环
 
