@@ -1,16 +1,80 @@
-# GPT ↔ Codex Bridge
+# 为了省 Token，我做了一个让 GPT 和 Codex 自己对话的 Skill
 
-> One request → executor works and pushes evidence → GPT independently reviews → FIX triggers repair and re-review → PASS stops.
+> **GPT-Codex Bridge** · Stop copy-pasting. Let agents review each other's work.
 
-一个利用**现有 ChatGPT 会话 + Codex / Luna + 浏览器操作 + GitHub** 的通用 Agent Skill。它让执行 Agent 自动往返指定 ChatGPT 对话，由 GPT 独立审计真实成果；不是将多个角色伪装成同一个 Agent，也不要求为 ChatGPT 另开 API 会话。
+最开始只是觉得这件事太浪费了：
 
-## 状态
+在 ChatGPT 里讨论需求、定好验收标准 → 复制给 Codex / Luna → 等它执行完 → 再把结果复制回 GPT → GPT 发现问题 → 我继续转发给 Codex……
 
-- **有实战反馈**：用户确认已经完成过 GPT 给出 FIX → Luna 修复并 Push → GPT 审查新 SHA，以及此前 Chrome 双向通信。
-- **未独立覆盖**：换电脑/新 Agent 安装、完整中断恢复、所有浏览器工具与所有任务类型。
-- **不包含**：通用 Chrome 驱动、永久授权、自动合并/发布/部署、无需登录的 ChatGPT API。
+**我不是在开发，我是在给两个 AI 当传话筒。**
 
-## 安装（Codex）
+每轮还得重复解释背景、贴 Diff、核对结果，既费时间，也容易消耗不必要的 Token。
+
+所以我做了 **`gpt-codex-bridge`**：利用现有的 ChatGPT 对话、浏览器操作能力和 GitHub，让执行 Agent 自动交接成果、让 GPT 独立审查；不通过就自动修复、重新提交、再次审查。
+
+**你只负责提出目标和必要授权，不用每轮手动复制粘贴。**
+
+## 它能做什么？
+
+```text
+         你：在 ChatGPT 聊清楚目标
+                      │
+                      ▼
+            Codex / Luna 执行
+          读文件 → 改代码 → 自测
+                      │
+                      ▼
+              Commit & Push
+                      │
+                      ▼
+               GitHub 证据
+                      │
+                      ▼
+        GPT 回到原 ChatGPT 对话审计
+        ├─ PASS       → 任务完成，停止
+        ├─ FIX        → 自动反馈 Codex 修复
+        └─ UNVERIFIED → 补充证据，不盲改
+                           │
+                           └─ 自测 → Push 新 SHA → 复审
+```
+
+关键不在于让两个模型聊天，而在于**让它们围绕同一个目标，把事情做完**：
+
+- **保留原对话上下文**：继续使用你最初提出目标的 ChatGPT 会话，不强制创建一个什么都不知道的新 GPT 对话。
+- **减少人工搬运**：在用户授权、浏览器工具可用的情况下，Agent 自动发送交接消息并读取对应回复。
+- **真正独立审查**：代码任务由 GPT 自己通过 GitHub 读取实际 Commit、Diff、源码及测试，而不只是相信 Codex 的“已完成”。
+- **自动修复与复验**：GPT 返回 `FIX`，Codex 只修最优先的问题；提交新 SHA 后再次送审。
+- **有边界地停止**：`PASS` 即结束；证据不足、消息错配、权限缺失或达到次数上限则停止，不擅自合并、发布、部署。
+
+## 什么场景值得用？
+
+| 场景 | 过去的做法 | 用 Bridge 之后 |
+|---|---|---|
+| **AI 编程 / Bug 修复** | 把报错、Diff、修复结果来回粘贴 | 执行 → Push → GPT 审计 → FIX 自动回流 |
+| **前端 UI / 用户旅程优化** | 自己每轮充当产品经理和验收员 | GPT 按原需求审查证据，Codex 定向修复 |
+| **复杂需求 / 多轮重构** | 经常重新讲背景，担心 Agent 偏离目标 | 原会话保留目标和边界，每轮用 SHA 锁定成果 |
+| **PR 前代码审查** | Agent 自检通过，还得人工找第二个 Agent 复核 | GPT 读取真实代码独立审查；不会自动合并 |
+| **文档、研究和数据任务** | 在不同工具间重复解释要求和贴产物 | 双方能独立读取共享产物时，同样可交接与复核 |
+
+尤其适合：**验收标准明确、需要反复迭代，但你不想一直盯着 Agent 的任务。**
+
+## 为什么一定要通过 GitHub 审计？
+
+因为“执行 Agent 说测试通过”不等于“需求真的实现”。
+
+Bridge 在代码任务中将 **GitHub 作为共享的代码证据源**：
+
+1. Codex 完成任务、自测后，在**本轮获得授权的独立分支**提交并 Push。
+2. 交接携带 `run_id`、`turn_id`、基线 SHA、最新 SHA 和自测摘要。
+3. GPT **亲自读取**远端提交、必要的上下文源码和测试，返回 `PASS / FIX / UNVERIFIED`。
+4. Codex 只接受关联 ID 和 `reviewed_sha` 匹配的完整回复；`FIX` 则修改后以**新的 SHA**重新送审。
+5. 审查通过后停止，不把“审查通过”自动理解为“授权发布”。
+
+不涉及 Git 的任务也能使用，但必须提供双方都能独立核验的实际产物，不能凭空生成提交记录。
+
+## 3 步开始使用
+
+### 1. 安装 Skill
 
 ```bash
 git clone https://github.com/shanwen1/skills.git
@@ -18,30 +82,51 @@ mkdir -p ~/.agents/skills
 cp -R skills/gpt-codex-bridge ~/.agents/skills/
 ```
 
-在 Codex 使用 `$gpt-codex-bridge`，提供本轮目标与要继续的 **ChatGPT 完整对话链接**。需先确认现有浏览器工具能在用户许可范围内**读取并发送该已登录对话的消息**，以及本轮是否授权 Git push。不能访问时应报告阻断，不模拟自动桥接。
+在 Codex 中使用 `$gpt-codex-bridge`。如客户端需要，重新打开会话以刷新 Skill 列表。
 
-GPT 端可以将 [CHATGPT_INSTRUCTIONS.md](CHATGPT_INSTRUCTIONS.md) 放入相关 ChatGPT 项目指令。无需创建新 ChatGPT 对话；执行 Agent 必须绑定用户指定的会话。
+### 2. 准备原来的 ChatGPT 对话
 
-## 用法
+在 ChatGPT 中明确你的目标与验收标准，复制**这条现有对话的完整 URL**。
 
-1. 用户在有目标上下文的 ChatGPT 对话中确定任务与验收，授权执行 Agent 向该会话发送交接消息。
-2. Codex/Luna 完成任务与自检；代码任务经允许只推独立 Git 分支。发送 `BRIDGE_HANDOFF` + 关联 ID + SHA。
-3. GPT **自己**查 GitHub 或共享产物，返回 `BRIDGE_REVIEW`（可附 `BRIDGE_NEXT`）。
-4. Codex/Luna 读取**完整且匹配**的回复：PASS 结束，FIX 修复并再次交付，UNVERIFIED 补证据。
-5. 单轮固定上限与权限约束；异常停止，不以空闲或历史回复冒充当前回复。
+还需确认：你的 Codex / Luna 已有获授权的浏览器工具，能够访问已登录的 ChatGPT 页面并发送、读取消息；审查端的 GPT 能访问目标 GitHub 仓库或共享产物。**安装 Skill 不会自动取得这些权限。**
 
-协议细节见 [references/protocol.md](references/protocol.md)，浏览器接入见 [references/transport.md](references/transport.md)，恢复约束见 [references/recovery.md](references/recovery.md)。
+### 3. 给 Codex 一条指令
 
-## 对不同环境的要求
+```text
+使用 $gpt-codex-bridge。
 
-| 依赖 | 必须具备 | 不具备时 |
-|---|---|---|
-| 执行 Agent | 可执行本地任务与已有浏览器操作能力 | 停止或退回手动交接 |
-| 已登录浏览器 | 获授权访问指定 ChatGPT 对话及发消息 | 不绕过登录/权限 |
-| GPT 审查端 | 独立访问目标 GitHub 仓库/共享产物 | UNVERIFIED |
-| Git push | 仅代码更新且用户当轮明确授权 | 不擅自上传代码 |
-| 状态保留 | 本地仓库外最小记录 | 不能可靠恢复时停机 |
+沿用这条 ChatGPT 对话中已经明确的目标和验收要求：
+<完整 ChatGPT 对话 URL>
 
-**隐私提示**：在已登录 Chrome 中自动化意味着浏览器工具可能具有广泛读取权限。优先使用已存在的细粒度授权；更大范围的浏览器权限需要单独征得用户同意。
+使用已授权的浏览器能力与该对话自动交接。
+本地完成任务并自检；在我授权的范围内提交到独立 Git 分支。
+让 GPT 独立审计实际证据。FIX 则只做最必要修复并再次送审，
+PASS 后停止；无法核验或需要扩大授权时停止报告。
+不要合并 main、发布、部署或修改生产数据。
+```
 
-**公开仓库不等于公开你的私有项目。** 本 Skill 不应包含客户名称、内部数据、私人对话 ID、GitHub 私有仓库代码或访问令牌。GitHub 仓库可见性由仓库所有者独立配置。
+如果是首次连接，Skill 会要求先验证一次 `BRIDGE_PING / BRIDGE_PONG`，防止把“能打开网页”误当成“通信已经打通”。
+
+ChatGPT 端可选用 [审查指令](CHATGPT_INSTRUCTIONS.md)；具体字段见 [协议](references/protocol.md)，浏览器适配见 [传输说明](references/transport.md)，中断恢复见 [恢复规则](references/recovery.md)。
+
+## 真的跑通过吗？
+
+**跑通过一轮真实的自动修复闭环。**
+
+在一次实际项目协作中，我使用已有 Chrome 会话，让 Codex / Luna 向当前 ChatGPT 对话自动交接；GPT 独立审查 GitHub 代码、返回 `FIX`；Luna 自动修复、Push 新提交，GPT 再次审计新的 SHA。
+
+这是使用者确认的真实运行经历，并非跨所有环境的兼容性保证。
+
+### 使用前要知道的边界
+
+- **不是新的 Agent 平台，也不是内置了浏览器驱动的应用。** Skill 复用你环境中实际可用的浏览器工具，不能凭 `SKILL.md` 凭空连接 Chrome。
+- **无需默认使用独立 GPT API**，前提是你已有可通过浏览器交互的 ChatGPT 会话；但浏览器访问本身需要用户授权。
+- **“省 Token”是出发点，不是已测量的节省比例。** 减少的是背景重复、长内容搬运和反复交接；独立审计照样消耗 Token。
+- **跨电脑安装与完整异常恢复尚未独立验证。** 若连接失败、回复不完整或 SHA 不匹配，应停止而不是假装通过。
+- **不包含永久授权**：不会自动获取 Cookies、绕过浏览器授权，或默认允许 Push、合并、部署、访问敏感数据。
+
+---
+
+**一句话：少当两个 AI 之间的传话筒，把精力留给定义问题和真正重要的判断。**
+
+如果你也天天在 ChatGPT 和 Codex 之间来回复制，欢迎试试 **GPT-Codex Bridge**。
