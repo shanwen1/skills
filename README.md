@@ -1,7 +1,7 @@
-<img width="842" height="561" alt="image" src="https://github.com/user-attachments/assets/c3834173-f98a-4e8b-926f-97048e7caead" /><img width="842" height="561" alt="image" src="https://github.com/user-attachments/assets/51ae3ca5-6b60-45b9-bc5f-16ae9109858d" /># 为了省 Token，我做了一个让 GPT 和 Codex 自己对话的 Skill
+为了省 Token，我做了一个让 GPT 和 Codex 自己对话的 Skill
 
 ### GPT-Codex Bridge — Stop copy-pasting. Let agents review each other's work.
-
+<img width="842" height="561" alt="image" src="https://github.com/user-attachments/assets/c3834173-f98a-4e8b-926f-97048e7caead" /> 
 我原本只想解决一个很小、但每天都在浪费时间的问题：
 
 > 在 ChatGPT 里把需求聊清楚 → 复制给 Codex → 等它写完 → 把结果粘回 GPT → GPT 发现问题 → 再复制回 Codex……
