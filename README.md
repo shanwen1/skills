@@ -12,6 +12,8 @@
 
 它的目标很直接：**你提出一次需求，让执行 Agent 和 GPT 自己完成「执行 → 审查 → 修复 → 复审」的循环。**
 
+![GPT-Codex Bridge：使用前反复复制粘贴，使用后自动执行、独立审查与修复复验](gpt-codex-bridge/assets/before-after.svg)
+
 ## 你负责定义目标，Agent 负责跑完闭环
 
 ```text
