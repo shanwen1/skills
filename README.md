@@ -1,6 +1,7 @@
 # 为了省 Token，我做了一个让 GPT 和 Codex 自己对话的 Skill
 
 ### GPT-Codex Bridge — Stop copy-pasting. Let agents review each other's work.
+![Uploading image.png…]()
 
 我原本只想解决一个很小、但每天都在浪费时间的问题：
 
