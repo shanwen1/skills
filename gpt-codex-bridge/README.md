@@ -1,4 +1,4 @@
-# 为了省 Token，我做了一个让 GPT 和 Codex 自己对话的 Skill
+# 为了省 Token，我做了一个让 GPT 和 Codex 自主对话的 Skill...
 
 > **GPT-Codex Bridge** · Stop copy-pasting. Let agents review each other's work.
 
