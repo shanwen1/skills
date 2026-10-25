@@ -14,6 +14,8 @@
 
 **你只负责提出目标和必要授权，不用每轮手动复制粘贴。**
 
+![GPT-Codex Bridge 漫画：使用前需要人工传话，使用后自动完成交接、GitHub 审计与修复](assets/before-after.svg)
+
 ## 它能做什么？
 
 ```text
