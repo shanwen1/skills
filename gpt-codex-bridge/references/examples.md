@@ -1,55 +1,47 @@
-# 跨任务类型最短示例
+# 示例（公开占位数据）
 
-## 例一：非代码任务（项目材料整理）
+以下只是协议说明，不是实际桥接记录。不要把示例 URL、SHA、测试输出当成真实证据。
 
-GPT → Codex：
+## 代码任务：用户提出一次目标，执行者反复修复
 
-```text
-【BRIDGE_TASK】
-目标：把客户访谈转录整理为可直接用于业务判断的拜访记录。
-已知上下文：以客户当前局面、真实需求、决策与下一步为重；事实与推断分开。
-输入与位置：本地 transcripts/customer-x.txt（仅 Codex 可访问）。
-边界与授权：不补写未出现的客户事实，不发给外部人员。
-验收：覆盖主要结论与待核验事项，每个关键判断可追溯到转录原文。
-交付：reports/customer-x-visit.md，并回 BRIDGE_HANDOFF（含关键段落/来源定位）。
-```
-
-Codex → GPT：
+用户已指定当前 ChatGPT 对话及验收目标，授权本次交接和在隔离分支推送**必要代码**。
 
 ```text
 【BRIDGE_HANDOFF】
-目标与状态：完成
-实际产出：reports/customer-x-visit.md；摘要：客户仍在需求澄清阶段……
-已验证：回查转录对应段落；关键判断标注转录位置。
-未验证或风险：预算尚无明确记录，未作为确定事实。
-需决策：无
+run_id: sample-run-001
+turn_id: sample-run-001:0
+repo: owner/example-repo
+branch: codex/example-fix
+base_sha: <40位基线提交 SHA>
+head_sha: <40位本轮远端提交 SHA>
+目标: 修复详情返回列表后筛选丢失
+产物: 修复涉及路由与状态恢复；详见远端 Diff
+本地自检: 相关测试通过（执行者报告，供进一步核验）
+未验证: 实际部署环境尚未检查
 ```
 
-GPT 若无法访问该文件，只能审核回执与随附摘录，不能声称审阅了整个文件。
-
-## 例二：代码任务（修复操作路径）
-
-GPT → Codex：
+GPT 自己读取目标提交后：
 
 ```text
-【BRIDGE_TASK】
-目标：修复用户从列表进入详情页时丢失筛选条件的问题。
-已知上下文：当前体验应允许返回列表后继续原筛选。
-输入与位置：Codex 本地仓库；先检查当前分支和相关实现。
-边界与授权：仅相关路由/状态逻辑及测试；不重做页面、不自动发布。
-验收：真实往返操作仍保留筛选；相关测试通过且无回归。
-交付：变更定位、测试/浏览器证据、分支/SHA（若提交），BRIDGE_HANDOFF。
+【BRIDGE_REVIEW】
+run_id: sample-run-001
+turn_id: sample-run-001:0
+reviewed_sha: <同一个本轮远端 SHA>
+verdict: FIX
+evidence: 已读取 Diff；发现返回路径没有恢复筛选参数
+gap: 详情页返回列表时丢失查询字符串
+【BRIDGE_NEXT】
+priority: 保留筛选查询参数
+acceptance: 筛选 → 详情 → 返回，筛选条件仍在
+constraints: 最小修复；不合并、不发布
 ```
 
-Codex → GPT：
+执行 Agent 修复、测试，得到**新的**远端 head SHA，发送 `sample-run-001:1`；GPT 对**新 SHA**重新审计，符合条件才 PASS。
 
-```text
-【BRIDGE_HANDOFF】
-目标与状态：完成
-实际产出：修改 filter-state.ts 和相关测试；分支 feat/keep-filter，SHA abc1234
-已验证：针对性测试通过；本地浏览器按“筛选→详情→返回”路径实测通过。
-未验证或风险：未验证移动端，因为本轮不涉及移动布局。
-需决策：是否合并与发布（未操作）。
-```
+## 非代码任务
 
-GPT 可以在获取对应 Diff、测试日志或共享运行证据后确认；未能取得则标注 `UNVERIFIED`。
+例如共享文档/报告：把 `repo/branch/base_sha/head_sha` 替换为 `artifact_id/source_version/content_digest`。审查者必须能够独立读取文件正文，不能只听 Agent 总结。没有远端 Git 的任务**不得捏造 Commit SHA**。
+
+## 兼容历史项目
+
+已有 `ONTO_SA_HANDOFF / ONTO_SA_REVIEW / ONTO_SA_NEXT` 可以作为标签别名；新增通用字段 `run_id`、`turn_id`、`head_sha/reviewed_sha`，字段含义不随项目改变。兼容前需确认旧回复结构真正满足这些关联条件。
