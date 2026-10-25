@@ -2,7 +2,7 @@
 
 > **GPT-Codex Bridge** · Stop copy-pasting. Let agents review each other's work.
 
-最开始只是觉得这件事太浪费了：
+我本人是一个普通的 plus 用户 ，跑 sol 半小时 token 就不够用了，于是乎就想着，诶 GPT 不是可以免费薅吗，那我就薅 GPT 的免费高级大脑，执行的活就让 luna 或者 DeepSeek Flash 简单执行就好，这样又可以白嫖高级模型，又可以用便宜的模型多干几次了，具体怎么做呢：
 
 在 ChatGPT 里讨论需求、定好验收标准 → 复制给 Codex / Luna → 等它执行完 → 再把结果复制回 GPT → GPT 发现问题 → 我继续转发给 Codex……
 
@@ -47,6 +47,8 @@
 - **真正独立审查**：代码任务由 GPT 自己通过 GitHub 读取实际 Commit、Diff、源码及测试，而不只是相信 Codex 的“已完成”。
 - **自动修复与复验**：GPT 返回 `FIX`，Codex 只修最优先的问题；提交新 SHA 后再次送审。
 - **有边界地停止**：`PASS` 即结束；证据不足、消息错配、权限缺失或达到次数上限则停止，不擅自合并、发布、部署。
+
+- 后面我就安心呼呼睡大觉，第二天上午来看最新的进展了～
 
 ## 什么场景值得用？
 
