@@ -54,7 +54,7 @@
 - **减少人工搬运**：在用户授权、浏览器工具可用的情况下，Agent 自动发送交接消息并读取对应回复。
 - **真正独立审查**：代码任务由 GPT 自己通过 GitHub 读取实际 Commit、Diff、源码及测试，而不只是相信 Codex 的“已完成”。
 - **自动修复与复验**：GPT 返回 `FIX`，Codex 只修最优先的问题；提交新 SHA 后再次送审。
-- **有边界地停止**：`PASS` 即结束；证据不足、消息错配、权限缺失或达到次数上限则停止，不擅自合并、发布、部署。
+- **围绕完整目标持续推进**：只有独立验证全部用户验收项后的 `PASS + ACHIEVED` 才是完成；FIX 自动修、UNVERIFIED 自动补证，真实阻断才暂停，不擅自合并、发布或部署。
 
 - 后面我就安心呼呼睡大觉，第二天上午来看最新的进展了～
 
@@ -112,14 +112,17 @@ cp -R skills/gpt-codex-bridge ~/.agents/skills/
 
 使用已授权的浏览器能力与该对话自动交接。
 本地完成任务并自检；在我授权的范围内提交到独立 Git 分支。
-让 GPT 独立审计实际证据。FIX 则只做最必要修复并再次送审，
-PASS 后停止；无法核验或需要扩大授权时停止报告。
+让 GPT 对原定整体目标的全部验收项独立审查。
+FIX 则自主修复并再次送审；UNVERIFIED 则优先补证。
+只有最新 SHA 被独立验收且整体目标达成才标记 DONE；
+目标未达成时在当前 Agent 会话内继续，不因单轮结束而停止。
+遇到权限、预算或不可恢复故障保存检查点并报告。
 不要合并 main、发布、部署或修改生产数据。
 ```
 
 如果是首次连接，Skill 会要求先验证一次 `BRIDGE_PING / BRIDGE_PONG`，防止把“能打开网页”误当成“通信已经打通”。
 
-ChatGPT 端可选用 [审查指令](CHATGPT_INSTRUCTIONS.md)；具体字段见 [协议](references/protocol.md)，浏览器适配见 [传输说明](references/transport.md)，中断恢复见 [恢复规则](references/recovery.md)。
+ChatGPT 端可选用 [审查指令](gpt-codex-bridge/CHATGPT_INSTRUCTIONS.md)；具体字段见 [协议](gpt-codex-bridge/references/protocol.md)，浏览器适配见 [传输说明](gpt-codex-bridge/references/transport.md)，中断恢复见 [恢复规则](gpt-codex-bridge/references/recovery.md)。
 
 ## 真的跑通过吗？
 
