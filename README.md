@@ -6,13 +6,13 @@
 
 在 ChatGPT 里讨论需求、定好验收标准 → 复制给 Codex / Luna → 等它执行完 → 再把结果复制回 GPT → GPT 发现问题 → 我继续转发给 Codex……
 
-**我不是在开发，我是在给两个 AI 当传话筒。**
+**之前：****我不是在开发，我是在给两个 AI 当传话筒。**
 
 每轮还得重复解释背景、贴 Diff、核对结果，既费时间，也容易消耗不必要的 Token。
 
-所以我做了 **`gpt-codex-bridge`**：利用现有的 ChatGPT 对话、浏览器操作能力和 GitHub，让执行 Agent 自动交接成果、让 GPT 独立审查；不通过就自动修复、重新提交、再次审查。
+**之后：有了`gpt-codex-bridge`**，利用现有的 ChatGPT 对话、浏览器操作能力和 GitHub，让执行 Agent 自动交接成果、让 GPT 独立审查；不通过就自动修复、重新提交、再次审查。
 
-**你只负责提出目标和必要授权，不用每轮手动复制粘贴。**
+**我只负责提出目标和必要授权，不用每轮手动复制粘贴。**
 
 <img width="842" height="561" alt="image" src="https://github.com/user-attachments/assets/c3834173-f98a-4e8b-926f-97048e7caead" /> 
 
