@@ -20,7 +20,7 @@
 
 ### 1. 过去：两个 AI 之间，只有我在来回复制粘贴
 
-![过去：普通 Plus 用户的 Token 焦虑和人工传话]( https://github.com/user-attachments/assets/cf9d443a-4002-442a-bdc1-709adcc53f71)
+![过去：普通 Plus 用户的 Token 焦虑和人工传话](https://github.com/user-attachments/assets/cf9d443a-4002-442a-bdc1-709adcc53f71)
 
 所以我做了这个 **GPT-Codex Bridge**：让执行 Agent 通过已授权的浏览器操作，把进度交回原来的 ChatGPT 对话；GPT 再通过 GitHub 独立检查真实提交和代码。没通过就把问题交回去，修完、Push 新 SHA、再审一轮。
 
