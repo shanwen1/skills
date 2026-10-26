@@ -15,10 +15,13 @@ GPT 负责把需求想清楚、定验收标准、检查真实成果；执行模�
 > ChatGPT 里聊清楚需求 → 复制给 Codex → 等它干活 → 把结果复制回来 → GPT 说这里不对 → 我再复制给 Codex……
 
 **我不是在开发，我是在给两个 AI 当传话筒。**
+<img width="1672" height="941" alt="两个 AI 之间的复制粘贴地狱" src="https://github.com/user-attachments/assets/cf9d443a-4002-442a-bdc1-709adcc53f71" />
+
 
 所以我做了 `gpt-codex-bridge`。它利用已有的、经过授权的浏览器操作能力，让执行 Agent 自动把结果发回原来的 ChatGPT 对话；GPT 再通过 GitHub 独立核对真实提交、Diff、源码和测试。不通过就继续修，Push 新 SHA，再让 GPT 看一遍。
+<img width="1448" height="1086" alt="自动协作桥接：开发者的深夜解放" src="https://github.com/user-attachments/assets/d74f84c4-3923-41c8-8fd2-fe26d102f83e" />
 
-<img width="842" alt="漫画对比：使用前，我在 GPT 和 Codex 之间反复复制粘贴；使用后，GPT 审查、执行 Agent 修复，自动形成闭环" src="https://github.com/user-attachments/assets/c3834173-f98a-4e8b-926f-97048e7caead" />
+
 
 **我想要的体验是：目标讲清楚一次，剩下的让它们自己跑。等我忙完回来，看到的是进展和证据，而不是一堆等着我转发的消息。**
 
