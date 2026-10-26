@@ -1,5 +1,7 @@
 # 为了省 Token，我做了一个让 GPT 和 Codex 自主对话的 Skill
 
+> 当前版本：v0.3.2
+
 > **GPT-Codex Bridge** · Stop copy-pasting. Let agents review each other's work.
 
 先说说我为什么会做这个东西。
@@ -72,6 +74,13 @@ GPT 回到原来的 ChatGPT 对话，独立检查最新 SHA
 
 简单说，它适合那些**有明确目标和验收标准、需要反复迭代，而我又不想一直盯着每一轮执行**的任务。
 
+## 这次 v0.3.2 加了什么？
+
+- **工作包式交接**：执行 Agent 先完成常规开发、自测和修复，达到可独立验收的检查点再找 GPT；只有设计风险或真实阻断才提前交接。
+- **增量上下文**：首次交接保存完整 `goal / acceptance / authorization / scope`；后续只传变化、证据、`base_sha / head_sha`，并用 `context_digest` 确认仍在同一目标上。
+- **确定性状态**：本地状态控制器负责 reply/handoff 去重、`run_id / turn_id / package_id / reviewed_sha` 校验、中断恢复和 DONE 后新任务接续；不靠增加提示词解决状态问题。
+- **轻量统计**：从状态日志统计工作包、正式交接、FIX 轮次和验收结果；没有真实 Token 数据时不估算成本。
+
 ## 为什么还要看 GitHub？
 
 因为“我改完了”和“需求真的实现了”是两回事。
@@ -91,11 +100,11 @@ GPT 回到原来的 ChatGPT 对话，独立检查最新 SHA
 
 ```bash
 git clone https://github.com/shanwen1/skills.git
-mkdir -p ~/.agents/skills
-cp -R skills/gpt-codex-bridge ~/.agents/skills/
+mkdir -p ~/.codex/skills
+cp -R skills/gpt-codex-bridge ~/.codex/skills/
 ```
 
-在 Codex 中调用 `$gpt-codex-bridge`。如果当前客户端没刷新出 Skill，可以重新打开会话再试。
+在 Codex 中调用 `$gpt-codex-bridge`。如果客户端使用 `~/.agents/skills` 作为发现根，把路径换成它即可。如果当前客户端没刷新出 Skill，可以重新打开会话再试。
 
 ### 第二步：准备原来的 ChatGPT 对话
 
@@ -125,6 +134,13 @@ FIX 就修复并再次送审；UNVERIFIED 就先补证。
 第一次连接时，先确认 `BRIDGE_PING / BRIDGE_PONG` 确实成功。能打开网页不等于已经打通消息收发。
 
 更详细的配置放在 [GPT 端审查指令](CHATGPT_INSTRUCTIONS.md)、[交接协议](references/protocol.md)、[浏览器传输说明](references/transport.md) 和 [中断恢复规则](references/recovery.md)。
+
+## 这次 v0.3.2 的本地验证
+
+- `python3 -m unittest discover -s tests -v`：25 项确定性测试通过，覆盖去重、run/turn/package ID 与 SHA/digest 一致性、中断恢复、重复失败、增量上下文和 DONE 后新 run 接续。
+- 隔离 Git 任务：FIX → 实际提交新 SHA → 增量交接 → PASS → DONE → 新 run READY，完整跑通。
+- 本次没有向正在使用的 ChatGPT 对话注入测试消息；真实 GPT 往返仍需在用户指定的测试对话和可独立读取的远端上验证。
+- 本地 runtime 不是常驻监听器；它支持状态持久化、幂等和恢复，但没有独立后台 runner。
 
 ## 那我能不能交代完就去睡觉？
 

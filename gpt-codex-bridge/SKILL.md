@@ -2,7 +2,7 @@
 name: gpt-codex-bridge
 description: 持续推进用户目标的 GPT ↔ Codex/Luna/DeepSeek 自动协作闭环。用于“直到验收通过再停”“GPT 独立审查 Codex 代码”“自动将 FIX 交给执行 Agent 反复修复”“无需人工转发”的任务。利用已获授权的浏览器与指定 ChatGPT 原对话及 GitHub/共享产物交接；支持进度续跑和阻断恢复，但 Skill 本身不是常驻进程或浏览器驱动。
 metadata:
-  version: "0.3.1"
+  version: "0.3.2"
 ---
 
 # GPT ↔ Codex Bridge · 目标驱动持续闭环
@@ -26,33 +26,74 @@ Bridge 的协议不等于模型的行为保证。不同模型/运行配置对长
 
 ## 启动：先锁定目标，再运行
 
-1. 明确 `goal`（最终用户结果）、`acceptance`（可验证清单）、`scope` 与 `permissions`。一次用户目标对应一个 `run_id`，跨轮次、重启与模型切换均不改变；绝不自动加入新需求。
-2. 获取用户指定的**完整现有 ChatGPT 对话 URL**，核实 conversation ID 与已登录页面；沿用当前获授权的浏览器工具，必要的新安装、远程调试或扩大权限必须先请示。**同一会话只允许一个浏览器控制者。**
-3. 核查是否有旧运行状态；有则**先恢复、查重**，不得从头重发。代码任务核对仓库规范、分支、基线 SHA、实际远端可访问性。
-4. 只有首次连接或连通性失效才做一次 `BRIDGE_PING/PONG`。按需读取 [传输](references/transport.md)、[协议](references/protocol.md)、[恢复](references/recovery.md)。
+1. 明确 `goal`（最终用户结果）、`acceptance`（可验证清单）、`scope` 与 `authorization`（授权边界）。一次用户目标对应一个 `run_id`，跨轮次、重启与模型切换均不改变；绝不自动加入新需求。
+2. 将 `goal / acceptance / authorization / scope` 固定写入状态文件并计算 `context_digest`；后续交接不得用执行摘要替换这份上下文。
+3. 获取用户指定的**完整现有 ChatGPT 对话 URL**，核实 conversation ID 与已登录页面；沿用当前获授权的浏览器工具，必要的新安装、远程调试或扩大权限必须先请示。**同一会话只允许一个浏览器控制者。**
+4. 核查是否有旧运行状态；有则**先恢复、查重**，不得从头重发。代码任务核对仓库规范、分支、基线 SHA、实际远端可访问性。
+5. 只有首次连接或连通性失效才做一次 `BRIDGE_PING/PONG`。按需读取 [传输](references/transport.md)、[协议](references/protocol.md)、[恢复](references/recovery.md)。
+
+## 工作包式执行与交接
+
+把一次可独立验收的完整工作作为一个 **work package**，而不是每改一个文件就找 GPT：
+
+1. 执行 Agent 自主完成常规开发、自测、失败修复和证据整理；达到 `READY_FOR_REVIEW` 检查点后再正式交接。
+2. 一个工作包至少包含：明确的变化范围、实际测试/运行证据、当前 `head_sha`、未验证项和风险。缺少这些，不算可审查检查点。
+3. 只有**重要设计风险、真实阻断或需要用户决策**时，才允许提前交接；状态标为 `BLOCKED`，说明最小恢复条件。
+4. 收到 `FIX` 后，直接完成修复、自测和新的提交，再以**新 SHA**发起下一次正式交接；不要把中间状态、口头计划或半成品反复送给 GPT。
+5. GPT 的最终独立验收不能被工作包自测替代；工作包只减少无效往返，不降低验收标准。
+
+## 增量上下文
+
+- 首次交接发送完整 `goal / acceptance / authorization / scope`，并携带 `context_digest`。
+- 后续交接只发送：`context_digest`、首次交接引用、`delta`（本轮变化）、关键证据、`base_sha`、`head_sha`、`package_id`。
+- 每次 GPT 回复都必须回显 `context_digest` 或 `reviewed_sha` 等关联字段；digest 不匹配时先补发完整上下文，不得直接审查。
+- 如果原对话丢失或上下文不可恢复，重新发送完整上下文，不凭摘要猜测目标。
 
 ## 循环：未满足目标就继续
 
 1. **执行并验证**：按整体目标选择当前最重要的未达验收点，完成必要工作和本地自检；先检查真实现有代码/材料。代码修改只在用户已授权时 Commit/Push 到隔离分支，不合并或部署。
-2. **形成唯一交接**：记下 `run_id + turn_id + base_sha + head_sha`（非代码任务用共享产物版本）。`BRIDGE_HANDOFF` 同时声明：**整体目标、全部验收项目前完成情况、当前轮改动、实测证据、尚未验证项**。不能把“单项已修复”写成“整体已完成”。
-3. **自动收发**：向**绑定的原 ChatGPT 对话**发送交接，验证实际出现；等待 GPT **完整回复**，核对 `run_id + turn_id + reviewed_sha` 及消息时序。无匹配就不执行审查指令、不重复盲发。
+2. **形成唯一交接**：用状态控制器生成一个 work package 交接；记下 `run_id + turn_id + package_id + base_sha + head_sha`。
+3. **自动收发**：向**绑定的原 ChatGPT 对话**发送交接，验证实际出现；等待 GPT **完整回复**，核对 `run_id + turn_id + package_id + reviewed_sha` 及消息时序。无匹配就不执行审查指令、不重复盲发。
 4. **独立审查并推进**：
-   - `PASS`：**仅在 GPT 对最新版本证明全部用户验收条件均满足**、不存在阻断验收的未验证项时记为 `DONE`。
-   - `FIX`：直接执行 `BRIDGE_NEXT` 中的**唯一优先差距**，自测、按既有授权 Push 新 SHA、交接重审；不要等待用户转发。
+   - `PASS + goal_status: ACHIEVED + acceptance_ok: true`：仅在 GPT 对最新版本证明全部用户验收条件均满足、且没有阻断验收的未验证项时记为 `DONE`。
+   - `FIX`：执行 `BRIDGE_NEXT` 中的**唯一优先差距**，自测、按既有授权 Push 新 SHA、交接重审；不要等待用户转发。
    - `UNVERIFIED`：若证据可在现有授权与工具内取得，**自主补证并重新提交核验**；否则报告确切阻断。
-   - 回报仅涉及局部完成、尚有其它既定验收项：**保持 `ACTIVE`，继续该目标范围内的下一项**，不是结束任务，也不是创造新目标。
+   - `NEXT`：生成唯一 pending action，继续原目标范围内的下一项；不是新目标。
 5. **检查是否真正完成**：每轮确认最新 SHA、目标验收矩阵、剩余动作和停止条件；若未完成且可执行，直接回到步骤 1。保持简短检查点，避免上下文膨胀。
+
+## 运行状态与恢复
+
+本地 `runtime/bridge_runtime.py` 是**状态控制器**，不是浏览器或后台调度器。它已实现：
+
+- 原子 JSON 状态；同一 `run_id` 仍要求单控制者，不能并发启动第二个发送者；
+- `run_id + turn_id + package_id + reviewed_sha` 关联校验；
+- 重复 reply 去重、重复 handoff 幂等、发送不确定状态；
+- action 中断后的 `RECOVERY_RECONCILE`，不盲目重放；
+- `PASS + ACHIEVED` 后的 `DONE`，以及同一状态文件上的新 `run_id` 接续；
+- 工作包、正式交接、FIX 轮次、验收结果的轻量统计。
+
+**能力边界**：当前没有独立常驻 runner；只有在 Agent 会话仍存活时才能持续循环。不要为了“通宵运行”自行新建调度系统；若宿主已有真实、已授权、已验证的续跑机制，才可从 `INTERRUPTED` 恢复。Skill 不能靠文字自动唤醒自己。
+
+执行模型是否会在目标未完成时主动续行，是独立变量。长循环前先用低风险任务验证完整 `FIX → 新 SHA → PASS`；若模型反复提前结束且没有真实阻断，优先更换已实测能持续推进的模型/运行器，不要靠不断加长提示词掩盖问题。
+
+## 确定性检查与效率统计
+
+优先用代码验证，不靠增加提示词：
+
+- `python3 -m unittest discover -s tests -v` 验证去重、ID/SHA 一致性、恢复、重复失败和 DONE 接续。
+- `python3 scripts/bridgectl.py --state <path> stats` 查看工作包数、正式交接数、FIX 轮次、验收结果和重复失败次数。
+- 只有拿到真实 Token 数据时才记录成本；没有数据就保持 `token_usage: null`，不估算、不虚构节省比例。
+- 同一 `main_finding` 连续出现时，状态控制器会标记 `diagnose_required`；先诊断卡点，不得无限重复同一修法。
 
 ## 不得自行提前收尾；也不得无限空转
 
-- **不以固定“最多 3 次 FIX”截断一个仍在进展中的目标**。修复轮数是可观察指标；用户另有预算/轮次/时限则严格遵守。若同一问题反复出现、连续两轮无实质进展或发生循环，应先诊断卡点，不得无限消耗配额。
+- **不以固定“最多 3 次 FIX”截断一个仍在进展中的目标**。修复轮数是可观察指标；用户另有预算/轮次/时限则严格遵守。
 - 可恢复的页面/工具超时：先只读校验是否已经发出或收到消息，再在有限次数内恢复/重试；不可盲目重发或重新执行可能有副作用的步骤。
 - 只有以下状态才允许退出当前执行：`DONE`（**整体目标验收 PASS**）、`BLOCKED`（权限、预算/额度、人工重大决策、不可恢复故障、持续无进展等真实阻断）、`PAUSED`（用户主动暂停）。**当前 Agent Turn/进程自然结束时仅记 `INTERRUPTED`，不可伪称 DONE。**
-- 若本环境具有**已启用且经过验证的持续执行/重唤醒机制**，用它从检查点恢复 `ACTIVE/INTERRUPTED`；否则仅能保证**当前 Agent 会话存活期间**的自主循环。**Skill 不是后台调度器，不能靠文字在模型会话结束、浏览器断开或 Mac 休眠后自动重启自己。** 要实现通宵无人值守，必须另有已授权、真实可用的长时运行/续跑机制；无法满足时明确说明。
 - 未获用户进一步授权，不得扩大浏览器访问权限、接触生产数据、删除历史、合并 main、发布或部署；异常不能用绕过授权来修。
 
 ## 退出回执
 
-仅在 DONE / BLOCKED / PAUSED 时给用户简短回执：整体目标、逐项验收结果、最新远端 SHA/共享实物、GPT 独立审查证据、修复轮次、剩余风险、停止原因；若仅是中断，保存状态以便恢复。协议字段和状态规则见 [references/protocol.md](references/protocol.md)、[references/recovery.md](references/recovery.md)。
+仅在 DONE / BLOCKED / PAUSED 时给用户简短回执：整体目标、逐项验收结果、最新远端 SHA/共享实物、GPT 独立审查证据、工作包数量、修复轮次、剩余风险、停止原因；若仅是中断，保存状态以便恢复。协议字段和状态规则见 [references/protocol.md](references/protocol.md)、[references/recovery.md](references/recovery.md)。
 
-**成熟度**：已有用户确认的真实 `FIX → Luna 修复 → Push → GPT 重审`；新的“目标级持续运行”是 v0.3 行为要求，**尚未验证跨 Turn 自动重唤醒或通宵无人值守**。
+**成熟度**：已有用户确认的真实 `FIX → Luna 修复 → Push → GPT 重审`；v0.3 的持续运行仍受执行模型和宿主续跑能力限制。状态机与隔离 Git 流程已通过本地确定性测试；真实 ChatGPT 往返、跨 Turn 自动唤醒和通宵无人值守不能仅凭本地测试宣称已验证。

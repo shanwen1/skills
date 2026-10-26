@@ -27,3 +27,7 @@
 ## 可迁移能力说明
 
 已有一次用户确认的成功案例：Codex/Luna 通过 Chrome 原生 UI 与 ChatGPT 现有对话双向交接。**本仓库没有复制那次环境的私有脚本或浏览器凭据**；新环境仍需确认本地实际工具能力，不能因为安装了 Skill 就宣布连接成功。
+
+## 不要误认浏览器外壳为 bridge runner
+
+看到 ChatGPT 页面、Electron 窗口或本地 CDP 端口，只能证明浏览器界面存在；不能证明 `gpt-codex-bridge` 正在持续监听。必须同时核对 bridge 状态文件、`bridgectl`/`bridge_runtime` 进程和最新消息 ID。像 Codex Web GPT 这类 launcher 可能提供 ChatGPT Web 访问或 CDP，但不是本 Skill 的调度器；不要为“让它常驻”而停止或重建用户正在使用的程序。
