@@ -18,11 +18,23 @@
 
 **我不是在开发，我是在给两个 AI 当客服。**
 
+### 1. 过去：两个 AI 之间，只有我在来回复制粘贴
+
+![过去：普通 Plus 用户的 Token 焦虑和人工传话]( https://github.com/user-attachments/assets/cf9d443a-4002-442a-bdc1-709adcc53f71)
+
 所以我做了这个 **GPT-Codex Bridge**：让执行 Agent 通过已授权的浏览器操作，把进度交回原来的 ChatGPT 对话；GPT 再通过 GitHub 独立检查真实提交和代码。没通过就把问题交回去，修完、Push 新 SHA、再审一轮。
 
-<img width="842" alt="漫画对比：使用前，我在 GPT 和 Codex 之间反复复制粘贴；使用后，GPT 审查、执行 Agent 修复，自动形成闭环" src="https://github.com/user-attachments/assets/c3834173-f98a-4e8b-926f-97048e7caead" />
+### 2. 现在：让 GPT 和执行 Agent 自己交接、审查、修复
+
+![现在：GPT-Codex Bridge 自动交接，GitHub 提供真实代码证据](https://github.com/user-attachments/assets/d74f84c4-3923-41c8-8fd2-fe26d102f83e)
 
 **理想状态就是：我把目标和边界讲清楚一次，然后去忙自己的事。回头看结果，而不是每隔几分钟就回来复制一段话。**
+
+### 3. 效果：我去休息，回来直接看真实进展
+
+![效果：夜间休息，第二天查看 GitHub 提交与 GPT 对整个目标的独立验收](gpt-codex-bridge/assets/effect-morning.svg)
+
+> 这是我希望实现的体验。能否在电脑休眠、模型 Turn 结束后继续工作，还取决于运行环境是否具备真正的持续执行能力。
 
 ## 它怎么跑起来？
 
