@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+<title id="title">3 效果：我去睡觉，AI 继续干活，第二天看验收结果</title>
+<desc id="desc">漫画风对比夜间休息和早晨检查进展，GPT 独立审查 GitHub 提交，执行 Agent 根据反馈修复，整体目标验收 PASS 后才标记完成。夜间无人值守依赖运行环境持续执行。</desc>
+<defs>
+ <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#d8ebff"/><stop offset=".52" stop-color="#fff7e5"/><stop offset="1" stop-color="#f0fff1"/></linearGradient>
+ <linearGradient id="night" x2=".4" y2="1"><stop stop-color="#1b244e"/><stop offset="1" stop-color="#4c4d78"/></linearGradient>
+ <linearGradient id="day" x2="0" y2="1"><stop stop-color="#e7f9ff"/><stop offset="1" stop-color="#d0f7e4"/></linearGradient>
+ <linearGradient id="duvet" x2="0" y2="1"><stop stop-color="#4f8eda"/><stop offset="1" stop-color="#22478a"/></linearGradient>
+ <linearGradient id="check" x2="0" y2="1"><stop stop-color="#4dd4a5"/><stop offset="1" stop-color="#087f68"/></linearGradient>
+ <filter id="shadow"><feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#1c334b" flood-opacity=".17"/></filter>
+ <marker id="arrow" markerHeight="8" markerWidth="8" refX="7.5" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#329bce"/></marker>
+ <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="12" cy="12" r="1.8" fill="#84abd0" opacity=".28"/></pattern>
+ <style>text{font-family:'Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif} .heavy{font-weight:900} .mid{font-weight:700} .small{font-size:23px} .caption{font-size:29px} .label{font-size:25px}</style>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/><rect width="1600" height="900" fill="url(#dots)" opacity=".45"/>
+<path d="M22 26Q22 15 35 15H1554Q1573 15 1573 34V139H22Z" fill="#182a45"/>
+<rect x="47" y="41" width="116" height="66" rx="19" fill="#0bae85"/><text x="105" y="88" fill="#fff" text-anchor="middle" font-size="40" class="heavy">3</text>
+<text x="184" y="86" fill="#fff" font-size="50" class="heavy">效果：AI 干活，我终于不用一直盯着了</text>
+<text x="183" y="124" fill="#c8e9fe" font-size="23" class="mid">GPT-Codex Bridge · 交代一次目标，自动审查、修复与复验</text>
+<!-- night panel -->
+<rect x="31" y="166" width="697" height="588" rx="30" fill="url(#night)" filter="url(#shadow)"/>
+<text x="64" y="220" fill="#f6e7c0" font-size="34" class="heavy">晚上 23:30</text>
+<text x="64" y="254" fill="#d3e3fa" font-size="23">我：任务交代好了，先睡了。</text>
+<path d="M585 219a66 66 0 1 0 72-94a57 57 0 1 1-72 94" fill="#ffdc91" transform="translate(-6 50)"/>
+<g fill="#fff1ca"><circle cx="391" cy="228" r="6"/><circle cx="677" cy="337" r="4"/><circle cx="527" cy="200" r="5"/><path d="M662 281l7 21 22 7-22 7-7 21-7-21-21-7 21-7Z"/></g>
+<!-- sleeping user -->
+<path d="M90 527q12-142 172-157l208 5q105 21 122 131l5 109H91Z" fill="#171c38"/>
+<ellipse cx="265" cy="445" rx="115" ry="97" fill="#ffcfaa" stroke="#26334c" stroke-width="7"/>
+<path d="M153 431q-4-120 121-115 120 5 111 111l-26-56-39-30-42 30-33-5-57 43Z" fill="#262337"/>
+<path d="M201 446q29 28 57 0M288 446q29 28 57 0" fill="none" stroke="#34233c" stroke-width="8" stroke-linecap="round"/>
+<path d="M243 502q30 20 55 0" fill="none" stroke="#b76a78" stroke-width="6" stroke-linecap="round"/>
+<path d="M76 563q89-81 221-45l260-14q108 19 111 110v110H82Z" fill="url(#duvet)" stroke="#223d7b" stroke-width="8"/>
+<path d="M112 597q232 41 496-22M107 664q292 27 517-19" fill="none" stroke="#8bbbf9" stroke-width="10" opacity=".45"/>
+<ellipse cx="523" cy="578" rx="71" ry="39" fill="#d19c63"/><ellipse cx="560" cy="552" rx="34" ry="32" fill="#e2b47a"/>
+<path d="M537 526l5-22 18 18 27-20 5 30" fill="#e2b47a" stroke="#936742" stroke-width="5"/><path d="M547 559q12 11 24 0" stroke="#6c503d" stroke-width="5" fill="none"/>
+<path d="M115 279q-4-35 33-37h340q29 0 29 29v65q0 28-29 28H267l-34 24v-24h-85q-33 0-33-30Z" fill="#fff" stroke="#d4e9f4" stroke-width="5"/>
+<text x="139" y="290" fill="#30405d" font-size="24" class="mid">我只负责说清楚目标，</text><text x="139" y="325" fill="#30405d" font-size="24" class="mid">剩下的让它们自己跑！</text>
+<!-- interstitial ai loop -->
+<path d="M750 450q25-25 52 0l17 17-17 18q-27 24-52 0" fill="none" stroke="#329bce" stroke-width="12" marker-end="url(#arrow)"/>
+<!-- day panel -->
+<rect x="834" y="166" width="733" height="588" rx="30" fill="url(#day)" filter="url(#shadow)"/>
+<text x="874" y="222" fill="#174d71" font-size="34" class="heavy">第二天 09:00</text><text x="875" y="258" fill="#497e8b" class="small">打开电脑，先看真实进展和审查证据。</text>
+<circle cx="1485" cy="235" r="60" fill="#ffd06f"/><g stroke="#ffd06f" stroke-width="9" stroke-linecap="round"><path d="M1485 147v-23M1485 322v25M1401 236h-22M1554 236h23M1427 176l-16-17M1545 296l14 16M1542 176l17-17M1425 298l-16 16"/></g>
+<!-- results window -->
+<rect x="871" y="290" width="654" height="389" rx="22" fill="#fff" stroke="#a5cfde" stroke-width="6"/>
+<path d="M871 310q0-20 21-20h611q22 0 22 20v53H871Z" fill="#263d58"/><circle cx="906" cy="327" r="8" fill="#fc7e85"/><circle cx="931" cy="327" r="8" fill="#ffdb84"/><circle cx="956" cy="327" r="8" fill="#57d3af"/>
+<text x="1195" y="339" fill="#fff" font-size="28" text-anchor="middle" class="heavy">早上查看：GPT 独立验收</text>
+<g class="mid" font-size="25" fill="#254760">
+<circle cx="930" cy="404" r="20" fill="#35bc87"/><text x="930" y="414" text-anchor="middle" fill="white" font-size="30">✓</text><text x="972" y="415">需求实现：核心功能完成</text>
+<circle cx="930" cy="465" r="20" fill="#35bc87"/><text x="930" y="476" text-anchor="middle" fill="white" font-size="30">✓</text><text x="972" y="476">提交代码：GitHub 新 SHA 已核对</text>
+<circle cx="930" cy="526" r="20" fill="#35bc87"/><text x="930" y="537" text-anchor="middle" fill="white" font-size="30">✓</text><text x="972" y="537">GPT 审查：发现的问题已修复</text>
+<circle cx="930" cy="587" r="20" fill="#35bc87"/><text x="930" y="598" text-anchor="middle" fill="white" font-size="30">✓</text><text x="972" y="598">整体验收：PASS · 可以收工了</text></g>
+<!-- Robot emoji vector -->
+<rect x="1313" y="611" width="170" height="45" rx="20" fill="#e1faf0"/><text x="1398" y="642" text-anchor="middle" fill="#0a8261" font-size="25" class="heavy">PASS ✓</text>
+<!-- bottom payoff strip -->
+<rect x="31" y="775" width="1536" height="98" rx="25" fill="#162e4b"/>
+<rect x="50" y="797" width="253" height="53" rx="18" fill="#ffe067"/><text x="177" y="834" text-anchor="middle" fill="#293143" font-size="29" class="heavy">核心收益</text>
+<text x="340" y="815" fill="#fff" font-size="26" class="mid">少复制粘贴</text><text x="340" y="849" fill="#b4e7fb" font-size="22">不用做人肉传话筒</text>
+<text x="641" y="815" fill="#fff" font-size="26" class="mid">有据可查</text><text x="641" y="849" fill="#b4e7fb" font-size="22">每轮看 GitHub + SHA</text>
+<text x="953" y="815" fill="#fff" font-size="26" class="mid">目标优先</text><text x="953" y="849" fill="#b4e7fb" font-size="22">没达标就继续迭代</text>
+<text x="1260" y="815" fill="#fff" font-size="26" class="mid">我去睡觉</text><text x="1260" y="849" fill="#b4e7fb" font-size="22">回来看验收结果</text>
+</svg>
